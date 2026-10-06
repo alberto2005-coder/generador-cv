@@ -129,6 +129,12 @@ input[type=color]{
 }
 .foto-caja img{width:100%;height:100%;object-fit:cover}
 .foto-botones{display:flex;flex-direction:column;gap:.4rem}
+.campo-radio{margin-top:.15rem}
+.campo-radio .etq-radio{margin-bottom:.1rem}
+.campo-radio b{color:var(--acento3);font-variant-numeric:tabular-nums}
+input[type=range]{
+  padding:0;height:26px;background:transparent;border:0;accent-color:var(--acento);cursor:pointer;
+}
 
 /* ── Toggles ── */
 .toggles{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem}

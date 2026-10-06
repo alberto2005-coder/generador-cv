@@ -52,6 +52,20 @@
             <button type="button" class="btn mini fantasma" id="foto-del">Quitar</button>
           </div>
         </div>
+        <label>Forma de la foto
+          <select data-foto-forma>
+            <option value="">La que decida la plantilla</option>
+            <option value="f-recta">Recta (esquinas a escuadra)</option>
+            <option value="f-redonda">Esquinas redondeadas</option>
+            <option value="f-circulo">Circular</option>
+            <option value="f-ovoide">Ovoide (óvalo)</option>
+          </select>
+        </label>
+        <div class="campo-radio" id="campo-radio" hidden>
+          <label class="etq-radio">Redondeo de las esquinas: <b id="radio-valor">14 px</b>
+            <input type="range" min="0" max="60" step="1" value="14" data-foto-radio>
+          </label>
+        </div>
         <p class="ayuda">Se recorta y comprime sola (máx. 760 px). Todo se queda en tu navegador, no se sube a ningún servidor.</p>
       </div>
     </details>

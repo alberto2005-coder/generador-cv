@@ -149,6 +149,7 @@ let estiloTitulos = "";    // "" | tit-normal | tit-versalitas
 let mostrarFoto = true;
 let mostrarPie = true;
 let formaFoto = "";        // "" = la que decida la plantilla
+let radioFoto = 14;        // radio en px cuando la forma es "redonda"
 let zoom = "auto";
 
 function clonar(x) { return JSON.parse(JSON.stringify(x)); }
@@ -171,7 +172,7 @@ function tiene(obj, k) { return Object.prototype.hasOwnProperty.call(obj, k); }
 
 let avisoGuardado = false;
 function empaquetar() {
-  return { v: 2, datos, tema, colores, fuente, tamano, interlineado, estiloTitulos, mostrarFoto, mostrarPie, formaFoto, zoom };
+  return { v: 2, datos, tema, colores, fuente, tamano, interlineado, estiloTitulos, mostrarFoto, mostrarPie, formaFoto, radioFoto, zoom };
 }
 function guardar() {
   try { localStorage.setItem(CLAVE, JSON.stringify(empaquetar())); avisoGuardado = false; }
@@ -195,6 +196,7 @@ function cargar() {
     if (typeof o.mostrarFoto === "boolean") mostrarFoto = o.mostrarFoto;
     if (typeof o.mostrarPie === "boolean") mostrarPie = o.mostrarPie;
     if (typeof o.formaFoto === "string") formaFoto = o.formaFoto;
+    if (o.radioFoto) radioFoto = +o.radioFoto;
     if (o.zoom) zoom = o.zoom;
   } catch (e) {}
 }
@@ -287,6 +289,7 @@ function varsCSS() {
     `--sobre-secundario:${sobre(s)}`,
     `--sobre-mixto:${sobre(mezclar(a, s, 0.5))}`,
     `--interlineado:${interlineado}`,
+    `--radio-foto:${radioFoto}px`,
     `--tamano:${tamano}px`
   ];
   if (fuente) lista.push(`--fuente:${fuente}`);
@@ -704,6 +707,17 @@ function volcarEstilo() {
   });
   const selForma = form.querySelector("[data-foto-forma]");
   if (selForma) selForma.value = formaFoto;
+  volcarFormaFoto();
+}
+
+/** El deslizador de radio solo aparece con la forma "esquinas redondeadas" */
+function volcarFormaFoto() {
+  const campo = document.getElementById("campo-radio");
+  const slider = form.querySelector("[data-foto-radio]");
+  const etiqueta = document.getElementById("radio-valor");
+  if (campo) campo.hidden = formaFoto !== "f-redonda";
+  if (slider) slider.value = radioFoto;
+  if (etiqueta) etiqueta.textContent = radioFoto + " px";
 }
 function pintarFoto() {
   if (datos.foto) {
@@ -791,9 +805,17 @@ function manejar(el) {
     return true;
   }
 
-  if (el.dataset.fotoForma) {
-    formaFoto = el.dataset.fotoForma;
+  if (el.hasAttribute && el.hasAttribute("data-foto-forma")) {
+    formaFoto = el.value;
+    volcarFormaFoto();
     actualizar(true);
+    return true;
+  }
+  if (el.hasAttribute && el.hasAttribute("data-foto-radio")) {
+    radioFoto = Math.max(0, Math.min(60, +el.value || 0));
+    const etiqueta = document.getElementById("radio-valor");
+    if (etiqueta) etiqueta.textContent = radioFoto + " px";
+    actualizar();
     return true;
   }
 
