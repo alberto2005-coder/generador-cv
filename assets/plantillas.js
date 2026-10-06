@@ -198,7 +198,7 @@ body{font-family:Georgia,"Times New Roman",var(--fuente)}
 .cabecera .contacto{display:flex;flex-wrap:wrap;justify-content:center}
 .cabecera .contacto li{display:inline;margin:.1rem .1rem;font-size:.82rem;color:#333}
 .cabecera .contacto li:not(:last-child)::after{content:" · ";color:#9a9a9a}
-.cabecera .contacto a{color:#333;text-decoration:none}
+.cabecera .contacto a{display:inline;color:#333;text-decoration:none}
 .cabecera .contacto a:hover{text-decoration:underline}
 .cabecera .contacto .ico{display:none}
 main{padding-top:1.4rem}

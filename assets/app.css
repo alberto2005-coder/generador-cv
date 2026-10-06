@@ -11,6 +11,7 @@ html,body{height:100%}
 body{
   font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
   background:var(--oscuro);color:var(--texto);display:flex;flex-direction:column;
+  height:100vh;overflow:hidden;   /* la página no scrollea: scrollean los paneles */
 }
 button,input,select,textarea{font-family:inherit}
 
@@ -50,9 +51,20 @@ button,input,select,textarea{font-family:inherit}
 label.btn{margin:0}
 
 /* ── Estructura ── */
-.app{flex:1;display:grid;grid-template-columns:minmax(340px,440px) 1fr;min-height:0}
-.panel-form{overflow-y:auto;padding:1rem;background:var(--fondo-app);border-right:1px solid var(--linea)}
-.panel-vista{display:flex;flex-direction:column;min-width:0;background:var(--borde-app)}
+.app{
+  flex:1;min-height:0;min-width:0;
+  display:grid;grid-template-columns:minmax(340px,440px) 1fr;
+  grid-template-rows:minmax(0,1fr);   /* clave: la fila puede encoger → scroll interno */
+}
+.panel-form{
+  overflow-y:auto;min-height:0;      /* min-height:0 evita que el grid impida el scroll */
+  padding:1rem;background:var(--fondo-app);border-right:1px solid var(--linea);
+  scrollbar-width:thin;scrollbar-color:var(--linea) transparent;
+}
+.panel-form::-webkit-scrollbar{width:9px}
+.panel-form::-webkit-scrollbar-thumb{background:var(--linea);border-radius:9px}
+.panel-form::-webkit-scrollbar-track{background:transparent}
+.panel-vista{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--borde-app)}
 .vista-cab{
   padding:.45rem 1rem;font-size:.73rem;color:var(--suave);display:flex;
   justify-content:space-between;align-items:center;gap:1rem;border-bottom:1px solid var(--linea);
