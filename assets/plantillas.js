@@ -22,13 +22,13 @@ const CSS_BASE = `
   --sobre-acento:#fff;--sobre-secundario:#fff;--sobre-mixto:#fff;
   --fuente:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
   --mono:Consolas,"SF Mono",Menlo,monospace;
-  --tamano:15px;
+  --tamano:15px;--interlineado:1.6;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{
   background:var(--fondo);color:var(--texto);font-family:var(--fuente);
-  font-size:var(--tamano);line-height:1.6;-webkit-text-size-adjust:100%;
+  font-size:var(--tamano);line-height:var(--interlineado);-webkit-text-size-adjust:100%;
 }
 img{max-width:100%;display:block}
 a{color:var(--acento)}
@@ -100,7 +100,7 @@ const PLANTILLAS = {
   moderna: {
     nombre: "Moderna",
     desc: "Barra lateral oscura con foto circular",
-    defecto: { acento: "#2563eb", secundario: "#0f172a", fondo: "#eef2f7" },
+    defecto: { acento: "#2563eb", secundario: "#0f172a", texto: "#1f2937", fondo: "#eef2f7" },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -152,7 +152,7 @@ const PLANTILLAS = {
   clasica: {
     nombre: "Clásica",
     desc: "Serif, cabecera centrada, aspecto papel",
-    defecto: { acento: "#7a5c2e", secundario: "#141414", fondo: "#f5f4f0" },
+    defecto: { acento: "#7a5c2e", secundario: "#141414", texto: "#141414", fondo: "#f5f4f0" },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -225,7 +225,7 @@ main{padding-top:1.4rem}
   minimal: {
     nombre: "Mínima",
     desc: "Blanca, líneas finas, muy limpia",
-    defecto: { acento: "#0f766e", secundario: "#111827", fondo: "#ececeb" },
+    defecto: { acento: "#0f766e", secundario: "#111827", texto: "#111827", fondo: "#ececeb" },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -291,14 +291,14 @@ main{padding-top:1.5rem}
   creativa: {
     nombre: "Creativa",
     desc: "Cabecera con degradado y lateral de color",
-    defecto: { acento: "#f43f5e", secundario: "#7c3aed", fondo: "#f7f5ff" },
+    defecto: { acento: "#f43f5e", secundario: "#7c3aed", texto: "#1f2937", fondo: "#f7f5ff" },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="CV de {{nombre}} — {{puesto}}">
-<title={{nombre}}> · CV</title>
+<title>{{nombre}} · CV</title>
 <style>{{css}}</style>
 </head>
 <body>
@@ -363,7 +363,7 @@ main{padding-top:1.5rem}
   elegante: {
     nombre: "Elegante",
     desc: "Columna de perfil a la derecha, tonos cálidos",
-    defecto: { acento: "#b45309", secundario: "#292524", fondo: "#e8e4dd" },
+    defecto: { acento: "#b45309", secundario: "#292524", texto: "#292524", fondo: "#e8e4dd" },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -424,7 +424,7 @@ main{padding-top:1.5rem}
   tecnica: {
     nombre: "Técnica",
     desc: "Banda oscura, tipografía monoespaciada",
-    defecto: { acento: "#16a34a", secundario: "#111827", fondo: "#f1f5f9" },
+    defecto: { acento: "#16a34a", secundario: "#111827", texto: "#0f172a", fondo: "#f1f5f9" },
     html: `<!DOCTYPE html>
 <html lang="es">
 <head>
