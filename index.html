@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Creador de currículums online y gratis: elige plantilla, sube tu foto, personaliza colores y fuentes, y descarga tu CV en PDF.">
+<meta name="theme-color" content="#0f172a">
+<title>Creador de CV — plantillas, foto y descarga en PDF</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="barra">
+  <div class="marca">📄 <strong>Mi CV</strong> <span class="sub">elige · personaliza · descarga</span></div>
+  <div class="acciones">
+    <div class="grupo-zoom" role="group" aria-label="Zoom de la vista previa">
+      <span class="etq">Zoom</span>
+      <button type="button" data-zoom="auto" class="on">Auto</button>
+      <button type="button" data-zoom="1">100%</button>
+      <button type="button" data-zoom="0.75">75%</button>
+      <button type="button" data-zoom="0.5">50%</button>
+    </div>
+    <button type="button" class="btn fantasma" id="btn-json-out">⬇ JSON</button>
+    <label class="btn fantasma">⬆ JSON<input type="file" id="json-in" accept=".json,application/json" hidden></label>
+    <button type="button" class="btn fantasma" id="btn-descargar">⬇ HTML</button>
+    <button type="button" class="btn" id="btn-pdf">⬇ Descargar PDF</button>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ════════ PANEL DE EDICIÓN ════════ -->
+  <form id="form" class="panel-form" autocomplete="off">
+
+    <!-- 1 · PLANTILLA -->
+    <details class="seccion" open>
+      <summary>📐 <span>Elige tu plantilla</span></summary>
+      <div class="cuerpo">
+        <div id="plantillas" class="tpl-grid"></div>
+        <p class="ayuda">Puedes cambiar de plantilla en cualquier momento: tus datos se conservan.</p>
+      </div>
+    </details>
+
+    <!-- 2 · FOTO -->
+    <details class="seccion" open>
+      <summary>🖼 <span>Foto de perfil</span></summary>
+      <div class="cuerpo">
+        <div class="foto-fila">
+          <div class="foto-caja" id="foto-caja">Sin<br>foto</div>
+          <div class="foto-botones">
+            <label class="btn mini">⬆ Subir foto<input type="file" id="foto-in" accept="image/*" hidden></label>
+            <button type="button" class="btn mini fantasma" id="foto-del">Quitar</button>
+          </div>
+        </div>
+        <p class="ayuda">Se recorta y comprime sola (máx. 760 px). Todo se queda en tu navegador, no se sube a ningún servidor.</p>
+      </div>
+    </details>
+
+    <!-- 3 · DATOS PERSONALES -->
+    <details class="seccion" open>
+      <summary>👤 <span>Datos personales</span></summary>
+      <div class="cuerpo">
+        <div class="rejilla">
+          <label>Nombre<input data-bind="nombre" placeholder="Tu Nombre"></label>
+          <label>Puesto<input data-bind="puesto" placeholder="Diseñador/a UI"></label>
+        </div>
+        <label>Ubicación<input data-bind="ubicacion" placeholder="Madrid, España"></label>
+        <label>Perfil / resumen<textarea data-bind="resumen" rows="3" placeholder="Una frase o dos sobre ti…"></textarea></label>
+      </div>
+    </details>
+
+    <!-- 4 · CONTACTO -->
+    <details class="seccion">
+      <summary>📮 <span>Contacto</span></summary>
+      <div class="cuerpo">
+        <div class="rejilla">
+          <label>Email<input data-bind="contacto.email" placeholder="tu@email.com"></label>
+          <label>Teléfono<input data-bind="contacto.telefono" placeholder="+34 600 123 456"></label>
+          <label>Web<input data-bind="contacto.website" placeholder="https://…"></label>
+          <label>GitHub<input data-bind="contacto.github" placeholder="https://github.com/…"></label>
+        </div>
+        <label>LinkedIn<input data-bind="contacto.linkedin" placeholder="https://linkedin.com/in/…"></label>
+        <p class="ayuda">Todo es opcional: lo que dejes vacío no aparece en el CV.</p>
+      </div>
+    </details>
+
+    <!-- 5 · DISEÑO -->
+    <details class="seccion" open>
+      <summary>🎨 <span>Diseño: color, fuente y tamaño</span></summary>
+      <div class="cuerpo">
+        <div class="rejilla colores">
+          <label>Color principal<input type="color" data-estilo="acento" value="#2563eb"></label>
+          <label>Color secundario<input type="color" data-estilo="secundario" value="#0f172a"></label>
+          <label>Color del texto<input type="color" data-estilo="texto" value="#1f2937"></label>
+          <label>Fondo<input type="color" data-estilo="fondo" value="#eef2f7"></label>
+        </div>
+        <div class="rejilla">
+          <label>Fuente de los textos<select data-estilo="fuente" id="sel-fuente"></select></label>
+          <label>Tamaño de letra<select data-estilo="tamano" id="sel-tamano">
+            <option value="13">Pequeño (13 px)</option>
+            <option value="14">Compacto (14 px)</option>
+            <option value="15" selected>Normal (15 px)</option>
+            <option value="16">Cómodo (16 px)</option>
+            <option value="17">Grande (17 px)</option>
+            <option value="18">Muy grande (18 px)</option>
+          </select></label>
+          <label>Títulos de sección<select data-estilo="titulos">
+            <option value="">En mayúsculas</option>
+            <option value="tit-normal">Normal</option>
+            <option value="tit-versalitas">Versalitas</option>
+          </select></label>
+          <label>Interlineado<select data-estilo="interlineado">
+            <option value="1.45">Apretado</option>
+            <option value="1.6" selected>Normal</option>
+            <option value="1.8">Amplio</option>
+          </select></label>
+        </div>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" data-toggle="foto" checked> Mostrar foto</label>
+          <label class="toggle"><input type="checkbox" data-toggle="pie" checked> Mostrar pie con la fecha</label>
+        </div>
+        <button type="button" class="btn fantasma ancho" id="btn-colores">↺ Volver a los colores de la plantilla</button>
+      </div>
+    </details>
+
+    <!-- 6 · TÍTULOS DE LAS SECCIONES -->
+    <details class="seccion">
+      <summary>✏️ <span>Títulos de las secciones</span></summary>
+      <div class="cuerpo">
+        <div class="rejilla">
+          <label>Perfil<input data-titulo="perfil" placeholder="Perfil"></label>
+          <label>Experiencia<input data-titulo="experiencia" placeholder="Experiencia"></label>
+          <label>Educación<input data-titulo="educacion" placeholder="Educación"></label>
+          <label>Proyectos<input data-titulo="proyectos" placeholder="Proyectos"></label>
+          <label>Habilidades<input data-titulo="habilidades" placeholder="Habilidades"></label>
+          <label>Idiomas<input data-titulo="idiomas" placeholder="Idiomas"></label>
+          <label>Contacto<input data-titulo="contacto" placeholder="Contacto"></label>
+        </div>
+        <p class="ayuda">Déjalos en blanco para usar el título por defecto; escríbelos vacíos (borra el texto) y esa sección no llevará título.</p>
+      </div>
+    </details>
+
+    <!-- 7 · BLOQUES DE CONTENIDO -->
+    <div id="listas"></div>
+
+    <div class="pie-form">
+      <button type="button" class="btn fantasma" id="btn-ejemplo">🔄 Ejemplo</button>
+      <button type="button" class="btn peligro" id="btn-vaciar">🗑 Vaciar todo</button>
+    </div>
+    <p class="ayuda centro">Tus cambios se guardan solos en este navegador.</p>
+  </form>
+
+  <!-- ════════ VISTA PREVIA ════════ -->
+  <section class="panel-vista">
+    <div class="vista-cab">
+      <span>Vista previa en vivo · <span id="estado">listo</span></span>
+      <span class="ayuda">A4 · el PDF se genera desde aquí</span>
+    </div>
+    <div class="vista-scroll" id="vista-scroll">
+      <div class="vista-zoom" id="vista-zoom">
+        <iframe id="preview" title="Vista previa del CV"></iframe>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="assets/plantillas.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
