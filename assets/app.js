@@ -148,6 +148,7 @@ let interlineado = 1.6;
 let estiloTitulos = "";    // "" | tit-normal | tit-versalitas
 let mostrarFoto = true;
 let mostrarPie = true;
+let formaFoto = "";        // "" = la que decida la plantilla
 let zoom = "auto";
 
 function clonar(x) { return JSON.parse(JSON.stringify(x)); }
@@ -170,7 +171,7 @@ function tiene(obj, k) { return Object.prototype.hasOwnProperty.call(obj, k); }
 
 let avisoGuardado = false;
 function empaquetar() {
-  return { v: 2, datos, tema, colores, fuente, tamano, interlineado, estiloTitulos, mostrarFoto, mostrarPie, zoom };
+  return { v: 2, datos, tema, colores, fuente, tamano, interlineado, estiloTitulos, mostrarFoto, mostrarPie, formaFoto, zoom };
 }
 function guardar() {
   try { localStorage.setItem(CLAVE, JSON.stringify(empaquetar())); avisoGuardado = false; }
@@ -193,6 +194,7 @@ function cargar() {
     if (typeof o.estiloTitulos === "string") estiloTitulos = o.estiloTitulos;
     if (typeof o.mostrarFoto === "boolean") mostrarFoto = o.mostrarFoto;
     if (typeof o.mostrarPie === "boolean") mostrarPie = o.mostrarPie;
+    if (typeof o.formaFoto === "string") formaFoto = o.formaFoto;
     if (o.zoom) zoom = o.zoom;
   } catch (e) {}
 }
@@ -260,7 +262,7 @@ function coloresDe(t) {
 
 function varsCSS() {
   const c = coloresDe(tema);
-  const a = c.acento, s = c.secundario, t = c.texto, f = c.fondo;
+  const a = c.acento, s = c.secundario, t = c.texto, papel = c.fondo;
   const aT = mezclar(a, "#ffffff", 0.45);
   const aO = mezclar(a, "#000000", 0.30);
   const lista = [
@@ -268,13 +270,19 @@ function varsCSS() {
     `--acento-suave:${aT}`,
     `--acento-oscuro:${aO}`,
     `--acento-legible:${mejorContraste([a, aT, aO], s)}`,
+    `--acento-papel:${mejorContraste([a, aT, aO], papel)}`,
+    `--acento-panel:${mejorContraste([a, aT, aO], "#f4f4f5")}`,
     `--secundario:${s}`,
     `--secundario-claro:${mezclar(s, "#ffffff", 0.12)}`,
     `--secundario-tenue:${mezclar(s, "#ffffff", 0.92)}`,
-    `--fondo:${f}`,
+    `--papel:${papel}`,
+    `--fondo:${mezclar(papel, luminancia(papel) > 0.5 ? "#000000" : "#ffffff", 0.16)}`,
+    `--chip:${mezclar(papel, t, 0.09)}`,
     `--texto:${t}`,
-    `--texto-suave:${mezclar(t, "#ffffff", 0.42)}`,
-    `--linea:${mezclar(t, "#ffffff", 0.83)}`,
+    `--texto-suave:${mezclar(t, papel, 0.42)}`,
+    `--linea:${mezclar(papel, t, 0.15)}`,
+    `--texto-panel:#111827`,
+    `--texto-panel-suave:#64748b`,
     `--sobre-acento:${sobre(a)}`,
     `--sobre-secundario:${sobre(s)}`,
     `--sobre-mixto:${sobre(mezclar(a, s, 0.5))}`,
@@ -473,6 +481,7 @@ function construirHTML() {
   const foto = avatarHTML();
   const clases = [];
   if (!foto) clases.push("sin-foto");
+  if (formaFoto) clases.push(formaFoto);
   if (estiloTitulos) clases.push(estiloTitulos);
 
   const fecha = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
@@ -693,6 +702,8 @@ function volcarEstilo() {
   form.querySelectorAll("[data-toggle]").forEach(el => {
     el.checked = el.dataset.toggle === "foto" ? mostrarFoto : mostrarPie;
   });
+  const selForma = form.querySelector("[data-foto-forma]");
+  if (selForma) selForma.value = formaFoto;
 }
 function pintarFoto() {
   if (datos.foto) {
@@ -780,9 +791,25 @@ function manejar(el) {
     return true;
   }
 
+  if (el.dataset.fotoForma) {
+    formaFoto = el.dataset.fotoForma;
+    actualizar(true);
+    return true;
+  }
+
   if (el.dataset.estilo) {
     const k = el.dataset.estilo;
-    if (["acento", "secundario", "texto", "fondo"].includes(k)) coloresDe(tema)[k] = el.value;
+    if (["acento", "secundario", "texto", "fondo"].includes(k)) {
+      const c = coloresDe(tema);
+      c[k] = el.value;
+      // si el fondo elegido deja el texto ilegible, el texto se adapta solo
+      if (k === "fondo" && contraste(c.texto, c.fondo) < 3) {
+        c.texto = sobre(c.fondo);
+        const inpTexto = form.querySelector('[data-estilo="texto"]');
+        if (inpTexto) inpTexto.value = c.texto;
+        avisar("Color de texto ajustado a <b>" + esc(c.texto) + "</b> para que se lea sobre tu fondo.");
+      }
+    }
     else if (k === "fuente") fuente = el.value;
     else if (k === "tamano") tamano = +el.value;
     else if (k === "interlineado") interlineado = +el.value;

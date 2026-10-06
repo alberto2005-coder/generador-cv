@@ -17,7 +17,9 @@ const CSS_BASE = `
 :root{
   --acento:#2563eb;--acento-suave:#93c5fd;--acento-oscuro:#1d4ed8;--acento-legible:#93c5fd;
   --secundario:#0f172a;--secundario-claro:#26313f;--secundario-tenue:#f1f2f4;
-  --fondo:#f1f5f9;--linea:#e5e7eb;--texto:#1f2937;--texto-suave:#6b7280;
+  --fondo:#f1f5f9;--papel:#ffffff;--linea:#e5e7eb;--texto:#1f2937;--texto-suave:#6b7280;
+  --chip:#f3f4f6;--acento-papel:#2563eb;--acento-panel:#2563eb;
+  --texto-panel:#111827;--texto-panel-suave:#64748b;
   --sobre-acento:#fff;--sobre-secundario:#fff;--sobre-mixto:#fff;
   --fuente:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
   --mono:Consolas,"SF Mono",Menlo,monospace;
@@ -30,10 +32,10 @@ body{
   font-size:var(--tamano);line-height:var(--interlineado);-webkit-text-size-adjust:100%;
 }
 img{max-width:100%;display:block}
-a{color:var(--acento)}
+a{color:var(--acento-papel)}
 .hoja{
   position:relative;display:block;width:100%;max-width:794px;margin:1.5rem auto;
-  background:#fff;min-height:1123px;overflow:hidden;
+  background:var(--papel);min-height:1123px;overflow:hidden;
   box-shadow:0 10px 34px rgba(15,23,42,.13);
 }
 .avatar{
@@ -42,6 +44,11 @@ a{color:var(--acento)}
   color:var(--sobre-acento);font-weight:700;font-size:1.9rem;letter-spacing:.04em;flex:0 0 auto;
 }
 .sin-foto .avatar{display:none!important}
+/* ── forma de la foto (la elige el usuario) ── */
+.hoja.f-recta .avatar{border-radius:0}
+.hoja.f-redonda .avatar{border-radius:14px}
+.hoja.f-circulo .avatar{aspect-ratio:1;height:auto;border-radius:50%}
+.hoja.f-ovoide .avatar{aspect-ratio:3/4;height:auto;border-radius:50%}
 /* ── bloques de panel (contacto · habilidades · idiomas) ── */
 .panel-bloque{margin-top:1.5rem}
 .panel-bloque h3{
@@ -53,29 +60,29 @@ a{color:var(--acento)}
 .contacto a{display:flex;gap:.5rem;align-items:flex-start;color:var(--texto);text-decoration:none}
 .contacto .ico{flex:0 0 auto;width:1rem;text-align:center;line-height:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem}
-.chip{background:#f3f4f6;border:1px solid var(--linea);color:var(--texto);border-radius:6px;padding:.2rem .55rem;font-size:.76rem}
+.chip{background:var(--chip);border:1px solid var(--linea);color:var(--texto);border-radius:6px;padding:.2rem .55rem;font-size:.76rem}
 .cat{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--texto-suave);margin:.7rem 0 .4rem}
 .cat:first-child{margin-top:0}
 .idiomas{list-style:none}
 .idiomas li{display:flex;justify-content:space-between;gap:.8rem;font-size:.82rem;margin:.35rem 0}
-.nivel{color:var(--acento);font-size:.75rem}
+.nivel{color:var(--acento-papel);font-size:.75rem}
 /* ── columnas de contenido ── */
 .bloque{margin-bottom:1.5rem}
 .bloque>h2{
-  font-size:.92rem;text-transform:uppercase;letter-spacing:.1em;color:var(--acento);
+  font-size:.92rem;text-transform:uppercase;letter-spacing:.1em;color:var(--acento-papel);
   border-bottom:2px solid var(--linea);padding-bottom:.4rem;margin-bottom:.85rem;
 }
-.resumen{color:#374151;font-size:.94rem}
+.resumen{color:var(--texto);font-size:.94rem}
 .item{margin-bottom:1.05rem}
 .item:last-child{margin-bottom:0}
 .item-cab{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem}
 .item-cab h3{font-size:1rem;color:var(--texto)}
-.fechas{background:#f3f4f6;color:var(--texto-suave);border-radius:99px;padding:.15rem .6rem;font-size:.7rem;white-space:nowrap;flex:0 0 auto}
+.fechas{background:var(--chip);color:var(--texto-suave);border-radius:99px;padding:.15rem .6rem;font-size:.7rem;white-space:nowrap;flex:0 0 auto}
 .sub{font-size:.84rem;color:var(--texto-suave);font-weight:600;margin:.05rem 0 .3rem}
-.detalles{margin-left:1rem;color:#374151;font-size:.88rem}
+.detalles{margin-left:1rem;color:var(--texto);font-size:.88rem}
 .detalles li{margin:.2rem 0}
 .img-seccion{display:block;width:100%;height:auto;border-radius:4px;margin:.35rem 0 .7rem;border:1px solid var(--linea)}
-.enlazado{color:var(--acento);text-decoration:none}
+.enlazado{color:var(--acento-papel);text-decoration:none}
 .enlazado:hover{text-decoration:underline}
 /* ── variantes de estilo de títulos (las elige el usuario) ── */
 .hoja.tit-normal .bloque>h2{text-transform:none;letter-spacing:normal}
