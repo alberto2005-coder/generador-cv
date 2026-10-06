@@ -160,6 +160,27 @@ input[type=color]{
   color:var(--suave);padding:.45rem;border-radius:8px;cursor:pointer;font-size:.79rem;
 }
 .anadir:hover{border-color:var(--acento);color:var(--acento3)}
+
+/* ── Sub-listas (entradas tipo proyecto) ── */
+.sublista{display:flex;flex-direction:column;gap:.5rem;margin-top:.35rem}
+.subtarjeta{margin-top:0}
+.subtarjeta .cab-item{color:var(--suave);font-size:.66rem}
+.mini-caja{width:64px;height:64px;border-radius:8px;font-size:.6rem}
+
+/* ── Orden de las secciones ── */
+.orden-lista{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
+.orden-fila{
+  display:flex;align-items:center;gap:.5rem;background:var(--oscuro);
+  border:1px solid var(--linea);border-radius:8px;padding:.35rem .55rem;
+}
+.orden-nombre{flex:1;font-size:.8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.orden-btns{display:flex;gap:.2rem;flex:0 0 auto}
+.orden-btns button{
+  background:var(--oscuro2);border:1px solid var(--linea);color:var(--texto);
+  border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:.78rem;line-height:1;
+}
+.orden-btns button:hover:not(:disabled){background:var(--acento);border-color:var(--acento);color:#fff}
+.orden-btns button:disabled{opacity:.28;cursor:default}
 .ayuda{font-size:.71rem;color:var(--suave);margin-top:.45rem;line-height:1.5}
 .ayuda.centro{text-align:center}
 .pie-form{display:flex;gap:.5rem;margin-top:.9rem}
@@ -174,10 +195,10 @@ input[type=color]{
 }
 .toast.ver{transform:translate(-50%,0);opacity:1}
 
-/* ── Móvil ── */
+/* ── Móvil / ventana estrecha: dos filas scrolleables ── */
 @media (max-width:960px){
-  .app{grid-template-columns:1fr;grid-template-rows:auto 55vh}
-  .panel-form{border-right:0;border-bottom:1px solid var(--linea);max-height:45vh}
+  .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1.15fr)}
+  .panel-form{border-right:0;border-bottom:1px solid var(--linea);max-height:none}
   .acciones{margin-left:0;width:100%;justify-content:flex-start}
 }
 @media (max-width:520px){

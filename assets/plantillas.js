@@ -4,8 +4,7 @@
    Placeholders disponibles:
      {{css}} {{nombre}} {{puesto}} {{ubicacion}} {{foto}} {{pie}}
      {{contacto}} {{habilidades}} {{idiomas}}
-     {{seccion_resumen}} {{seccion_experiencia}} {{seccion_educacion}}
-     {{seccion_proyectos}} {{seccion_personalizadas}}
+     {{contacto}} {{habilidades}} {{idiomas}} {{cuerpo}} {{pie}}
    Variables CSS (inyectadas por app.js según los colores elegidos):
      --acento --acento-suave --acento-oscuro --acento-legible
      --secundario --secundario-claro --secundario-tenue
@@ -50,9 +49,9 @@ a{color:var(--acento)}
   border-bottom:1px solid var(--linea);padding-bottom:.45rem;margin-bottom:.7rem;
 }
 .contacto{list-style:none}
-.contacto li{font-size:.82rem;margin:.5rem 0;word-break:break-word}
-.contacto a{color:var(--texto);text-decoration:none;display:flex;gap:.5rem;align-items:flex-start}
-.contacto .ico{flex:0 0 auto;width:1rem;text-align:center}
+.contacto li{display:flex;gap:.5rem;align-items:flex-start;font-size:.82rem;margin:.5rem 0;word-break:break-word}
+.contacto a{display:flex;gap:.5rem;align-items:flex-start;color:var(--texto);text-decoration:none}
+.contacto .ico{flex:0 0 auto;width:1rem;text-align:center;line-height:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem}
 .chip{background:#f3f4f6;border:1px solid var(--linea);color:var(--texto);border-radius:6px;padding:.2rem .55rem;font-size:.76rem}
 .cat{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--texto-suave);margin:.7rem 0 .4rem}
@@ -75,6 +74,7 @@ a{color:var(--acento)}
 .sub{font-size:.84rem;color:var(--texto-suave);font-weight:600;margin:.05rem 0 .3rem}
 .detalles{margin-left:1rem;color:#374151;font-size:.88rem}
 .detalles li{margin:.2rem 0}
+.img-seccion{display:block;width:100%;height:auto;border-radius:4px;margin:.35rem 0 .7rem;border:1px solid var(--linea)}
 .enlazado{color:var(--acento);text-decoration:none}
 .enlazado:hover{text-decoration:underline}
 /* ── variantes de estilo de títulos (las elige el usuario) ── */
@@ -121,11 +121,7 @@ const PLANTILLAS = {
     {{idiomas}}
   </aside>
   <main class="contenido">
-    {{seccion_resumen}}
-    {{seccion_experiencia}}
-    {{seccion_educacion}}
-    {{seccion_proyectos}}
-    {{seccion_personalizadas}}
+    {{cuerpo}}
     {{pie}}
   </main>
 </div>
@@ -171,11 +167,7 @@ const PLANTILLAS = {
     {{contacto}}
   </header>
   <main>
-    {{seccion_resumen}}
-    {{seccion_experiencia}}
-    {{seccion_educacion}}
-    {{seccion_proyectos}}
-    {{seccion_personalizadas}}
+    {{cuerpo}}
     {{habilidades}}
     {{idiomas}}
     {{pie}}
@@ -246,11 +238,7 @@ main{padding-top:1.4rem}
     </div>
   </header>
   <main>
-    {{seccion_resumen}}
-    {{seccion_experiencia}}
-    {{seccion_educacion}}
-    {{seccion_proyectos}}
-    {{seccion_personalizadas}}
+    {{cuerpo}}
     <div class="paneles">{{habilidades}}{{idiomas}}</div>
     {{pie}}
   </main>
@@ -312,11 +300,7 @@ main{padding-top:1.5rem}
   </header>
   <div class="cuerpo">
     <main class="principal">
-      {{seccion_resumen}}
-      {{seccion_experiencia}}
-      {{seccion_educacion}}
-      {{seccion_proyectos}}
-      {{seccion_personalizadas}}
+      {{cuerpo}}
       {{pie}}
     </main>
     <aside class="lateral">
@@ -376,11 +360,7 @@ main{padding-top:1.5rem}
 <body>
 <div class="hoja{{estilo_clase}}">
   <main class="contenido">
-    {{seccion_resumen}}
-    {{seccion_experiencia}}
-    {{seccion_educacion}}
-    {{seccion_proyectos}}
-    {{seccion_personalizadas}}
+    {{cuerpo}}
     {{pie}}
   </main>
   <aside class="panel">
@@ -446,11 +426,7 @@ main{padding-top:1.5rem}
   </header>
   <div class="cuerpo">
     <main class="principal">
-      {{seccion_resumen}}
-      {{seccion_experiencia}}
-      {{seccion_educacion}}
-      {{seccion_proyectos}}
-      {{seccion_personalizadas}}
+      {{cuerpo}}
       {{pie}}
     </main>
     <aside class="lateral">

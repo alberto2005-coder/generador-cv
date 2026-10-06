@@ -98,11 +98,26 @@ const LISTAS = {
   },
   secciones: {
     titulo: "📌 Secciones propias", etiqueta: i => `Sección ${i + 1}`,
-    ayuda: "Crea tus apartados: Certificaciones, Cursos, Publicaciones, Referencias…",
-    vacio: () => ({ titulo: "", lineas: [] }),
+    ayuda: "Crea tus apartados con el formato que quieras: lista, entradas tipo proyecto, párrafo o imagen.",
+    vacio: () => ({ titulo: "", tipo: "lista", lineas: [], items: [], texto: "", imagen: "" }),
     campos: [
       { k: "titulo", l: "Título de la sección" },
-      { k: "lineas", l: "Contenido (una línea por punto)", t: "lines", area: true }
+      { k: "tipo", l: "Formato", t: "select", opciones: [
+          ["lista", "Lista con viñetas"],
+          ["items", "Entradas tipo proyecto"],
+          ["parrafo", "Párrafo de texto"],
+          ["imagen", "Imagen"]
+        ] },
+      { k: "lineas", l: "Contenido (una línea por punto)", t: "lines", area: true, si: ["lista"] },
+      { k: "items", t: "sub", l: "Entradas", si: ["items"],
+        subvacio: () => ({ nombre: "", fechas: "", enlace: "", descripcion: "" }),
+        subcampos: [
+          { k: "nombre", l: "Nombre" }, { k: "fechas", l: "Fechas" },
+          { k: "enlace", l: "Enlace (opcional)" },
+          { k: "descripcion", l: "Descripción", area: true }
+        ] },
+      { k: "texto", l: "Texto", t: "texto", area: true, si: ["parrafo"] },
+      { k: "imagen", t: "imagen", l: "Imagen", si: ["imagen"] }
     ]
   },
   campos_extra: {
@@ -320,13 +335,86 @@ function seccionProyectos(d) {
   });
   return bloque(tit("proyectos"), partes.join(""));
 }
-function seccionPropias(d) {
-  const partes = (d.secciones || []).map(s => {
-    const ul = (s.lineas && s.lineas.length)
+function seccionPropia(s, i) {
+  if (!s) return "";
+  const titulo = String(s.titulo || "").trim() || `Sección ${i + 1}`;
+  const tipo = s.tipo || "lista";
+  let cuerpo = "";
+
+  if (tipo === "items") {
+    cuerpo = (s.items || []).map(p => {
+      const nombre = p.enlace
+        ? `<a class="enlazado" href="${esc(p.enlace)}" target="_blank" rel="noopener">${esc(p.nombre)}</a>`
+        : esc(p.nombre);
+      return itemHTML(
+        `<h3>${nombre}</h3>${p.fechas ? `<span class="fechas">${esc(p.fechas)}</span>` : ""}`,
+        p.descripcion ? `<p class="sub">${esc(p.descripcion)}</p>` : "", null);
+    }).join("");
+  } else if (tipo === "imagen") {
+    cuerpo = s.imagen ? `<img class="img-seccion" src="${s.imagen}" alt="${esc(titulo)}">` : "";
+  } else if (tipo === "parrafo") {
+    const txt = String(s.texto || "").trim();
+    cuerpo = txt ? `<p class="resumen">${esc(txt).replace(/\n/g, "<br>")}</p>` : "";
+  } else {
+    cuerpo = (s.lineas && s.lineas.length)
       ? `<ul class="detalles">${s.lineas.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : "";
-    return bloque(s.titulo, ul);
+  }
+  return bloque(titulo, cuerpo);
+}
+
+/** Comprueba que las secciones tengan todos los campos del formato actual */
+function normalizarSecciones() {
+  (datos.secciones || []).forEach(s => {
+    if (["lista", "items", "parrafo", "imagen"].indexOf(s.tipo) === -1) s.tipo = "lista";
+    if (!Array.isArray(s.lineas)) s.lineas = [];
+    if (!Array.isArray(s.items)) s.items = [];
+    if (typeof s.texto !== "string") s.texto = "";
+    if (typeof s.imagen !== "string") s.imagen = "";
   });
-  return partes.join("");
+}
+
+/* ── Orden de las secciones del cuerpo ── */
+const BLOQUES = ["perfil", "experiencia", "educacion", "proyectos"];
+const ICONOS_BLOQUE = { perfil: "👤", experiencia: "💼", educacion: "🎓", proyectos: "🚀" };
+
+/** Borra del orden lo que ya no existe y añade lo nuevo (sin perder el resto) */
+function normalizarOrden() {
+  const secciones = datos.secciones || [];
+  const validos = new Set(BLOQUES.map(b => b).concat(secciones.map((_, i) => "propia:" + i)));
+  const o = Array.isArray(datos.orden) ? datos.orden.filter(t => validos.has(t)) : [];
+
+  BLOQUES.forEach((k, i) => {
+    if (o.indexOf(k) !== -1) return;
+    const previos = BLOQUES.slice(0, i).filter(p => o.indexOf(p) !== -1);
+    const pos = previos.length ? o.lastIndexOf(previos[previos.length - 1]) + 1 : o.length;
+    o.splice(pos, 0, k);
+  });
+  secciones.forEach((_, i) => {
+    const t = "propia:" + i;
+    if (o.indexOf(t) !== -1) return;
+    let ultima = -1;
+    o.forEach(x => { if (x.indexOf("propia:") === 0) ultima = Math.max(ultima, +x.slice(7)); });
+    const pos = ultima === -1 ? o.length : o.indexOf("propia:" + ultima) + 1;
+    o.splice(pos, 0, t);
+  });
+
+  datos.orden = o;
+  return o;
+}
+
+function cuerpoHTML(d) {
+  normalizarOrden();
+  return datos.orden.map(t => {
+    if (t === "perfil") return seccionResumen(d);
+    if (t === "experiencia") return seccionExperiencia(d);
+    if (t === "educacion") return seccionEducacion(d);
+    if (t === "proyectos") return seccionProyectos(d);
+    if (t.indexOf("propia:") === 0) {
+      const i = +t.slice(7);
+      return seccionPropia((d.secciones || [])[i], i);
+    }
+    return "";
+  }).join("");
 }
 function panelContacto(d) {
   const c = d.contacto || {};
@@ -399,11 +487,12 @@ function construirHTML() {
     contacto: panelContacto(d),
     habilidades: panelHabilidades(d),
     idiomas: panelIdiomas(d),
-    seccion_resumen: seccionResumen(d),
-    seccion_experiencia: seccionExperiencia(d),
-    seccion_educacion: seccionEducacion(d),
-    seccion_proyectos: seccionProyectos(d),
-    seccion_personalizadas: seccionPropias(d)
+    seccion_resumen: "",
+    seccion_experiencia: "",
+    seccion_educacion: "",
+    seccion_proyectos: "",
+    seccion_personalizadas: "",
+    cuerpo: cuerpoHTML(d)
   });
   return renderPlantilla(tpl.html, ctx);
 }
@@ -464,11 +553,8 @@ function renderListas() {
       </div>`;
       html += '<div class="rejilla">';
       for (const c of cfg.campos) {
-        const val = esc(valorTexto(item[c.k], c.t));
-        const campo = c.area
-          ? `<textarea data-list="${nombre}" data-idx="${idx}" data-key="${c.k}" data-t="${c.t || ""}" rows="3">${val}</textarea>`
-          : `<input data-list="${nombre}" data-idx="${idx}" data-key="${c.k}" data-t="${c.t || ""}" value="${val}">`;
-        html += `<div${c.area ? ' style="grid-column:1/-1"' : ""}><label>${esc(c.l)}${campo}</label></div>`;
+        if (c.si && c.si.indexOf(item.tipo || "lista") === -1) continue;
+        html += campoHTML(nombre, item, idx, c);
       }
       html += "</div>";
       tarjeta.innerHTML = html;
@@ -495,6 +581,91 @@ function renderListas() {
     det.appendChild(cuerpo);
     listas.appendChild(det);
   }
+}
+
+function etiquetaOrden(t) {
+  if (t.indexOf("propia:") === 0) {
+    const i = +t.slice(7);
+    const s = (datos.secciones || [])[i];
+    return "📌 " + ((s && String(s.titulo || "").trim()) || `Sección ${i + 1}`);
+  }
+  return (ICONOS_BLOQUE[t] || "•") + " " + tit(t);
+}
+function renderOrden() {
+  const cont = document.getElementById("orden");
+  if (!cont) return;
+  normalizarOrden();
+  const n = datos.orden.length;
+  cont.innerHTML = datos.orden.map((t, i) => `
+    <div class="orden-fila">
+      <span class="orden-nombre">${esc(etiquetaOrden(t))}</span>
+      <span class="orden-btns">
+        <button type="button" data-orden="${i}" data-dir="-1" title="Subir"${i === 0 ? " disabled" : ""}>↑</button>
+        <button type="button" data-orden="${i}" data-dir="1" title="Bajar"${i === n - 1 ? " disabled" : ""}>↓</button>
+      </span>
+    </div>`).join("");
+}
+
+/** HTML de un campo dentro de una tarjeta repetible (incluye select, sub-lista e imagen) */
+function campoHTML(lista, item, idx, c) {
+  const ancho = c.area || c.t === "sub" || c.t === "imagen" ? ' style="grid-column:1/-1"' : "";
+
+  if (c.t === "select") {
+    const actual = item[c.k] || (c.opciones[0] && c.opciones[0][0]);
+    const sel = `<select data-list="${lista}" data-idx="${idx}" data-key="${c.k}" data-t="select">` +
+      c.opciones.map(([v, l]) =>
+        `<option value="${esc(v)}"${v === actual ? " selected" : ""}>${esc(l)}</option>`).join("") +
+      `</select>`;
+    return `<div><label>${esc(c.l)}${sel}</label></div>`;
+  }
+
+  if (c.t === "sub") {
+    const subs = Array.isArray(item[c.k]) ? item[c.k] : (item[c.k] = []);
+    let h = '<div class="sublista">';
+    subs.forEach((sub, si) => {
+      h += `<div class="tarjeta subtarjeta">
+        <div class="cab-item">Entrada ${si + 1}</div>
+        <div class="herramientas">
+          <button type="button" title="Subir" data-submove="${lista}" data-idx="${idx}" data-key="${c.k}" data-subidx="${si}" data-dir="-1"${si === 0 ? " disabled" : ""}>↑</button>
+          <button type="button" title="Bajar" data-submove="${lista}" data-idx="${idx}" data-key="${c.k}" data-subidx="${si}" data-dir="1"${si === subs.length - 1 ? " disabled" : ""}>↓</button>
+          <button type="button" class="borrar" title="Eliminar" data-subdel="${lista}" data-idx="${idx}" data-key="${c.k}" data-subidx="${si}">✕</button>
+        </div>
+        <div class="rejilla">`;
+      for (const sc of c.subcampos) {
+        const v = esc(sub[sc.k] == null ? "" : String(sub[sc.k]));
+        const campo = sc.area
+          ? `<textarea data-sub="${lista}" data-idx="${idx}" data-key="${c.k}" data-subidx="${si}" data-subkey="${sc.k}" rows="2">${v}</textarea>`
+          : `<input data-sub="${lista}" data-idx="${idx}" data-key="${c.k}" data-subidx="${si}" data-subkey="${sc.k}" value="${v}">`;
+        h += `<div${sc.area ? ' style="grid-column:1/-1"' : ""}><label>${esc(sc.l)}${campo}</label></div>`;
+      }
+      h += "</div></div>";
+    });
+    h += `</div><button type="button" class="anadir" data-subadd="${lista}" data-idx="${idx}" data-key="${c.k}">+ Añadir entrada</button>`;
+    return `<div${ancho}><label>${esc(c.l)}</label>${h}</div>`;
+  }
+
+  if (c.t === "imagen") {
+    const img = item.imagen;
+    const caja = img ? `<img src="${img}" alt="">` : "Sin<br>imagen";
+    const borrar = img
+      ? `<button type="button" class="btn mini fantasma" data-imgdel="${lista}" data-idx="${idx}">Quitar</button>` : "";
+    return `<div${ancho}><label>${esc(c.l)}</label>
+      <div class="foto-fila">
+        <div class="foto-caja mini-caja">${caja}</div>
+        <div class="foto-botones">
+          <label class="btn mini">⬆ Subir<input type="file" data-img="${lista}" data-idx="${idx}" accept="image/*" hidden></label>
+          ${borrar}
+        </div>
+      </div>
+      <p class="ayuda">Ideal para gráficos, capturas o un certificado escaneado.</p>
+    </div>`;
+  }
+
+  const val = esc(valorTexto(item[c.k], c.t));
+  const campo = c.area
+    ? `<textarea data-list="${lista}" data-idx="${idx}" data-key="${c.k}" data-t="${c.t || ""}" rows="3">${val}</textarea>`
+    : `<input data-list="${lista}" data-idx="${idx}" data-key="${c.k}" data-t="${c.t || ""}" value="${val}">`;
+  return `<div${ancho}><label>${esc(c.l)}${campo}</label></div>`;
 }
 
 function volcarEstaticos() {
@@ -580,6 +751,24 @@ function manejar(el) {
     if (el.dataset.t === "lines") v = v.split("\n").map(s => s.trim()).filter(Boolean);
     else if (el.dataset.t === "commas") v = v.split(",").map(s => s.trim()).filter(Boolean);
     item[el.dataset.key] = v;
+    if (el.dataset.t === "select" && el.dataset.key === "tipo") {
+      normalizarSecciones();
+      if (v === "items" && !item.items.length) {
+        const campo = LISTAS.secciones.campos.find(c => c.k === "items");
+        item.items.push(campo.subvacio());
+      }
+      renderListas();     // cambian los campos del formato
+    }
+    actualizar();
+    return true;
+  }
+
+  if (el.dataset.sub) {
+    const arr = datos[el.dataset.sub];
+    const item = arr && arr[+el.dataset.idx];
+    const sub = item && Array.isArray(item[el.dataset.key]) && item[el.dataset.key][+el.dataset.subidx];
+    if (!sub) return true;
+    sub[el.dataset.subkey] = el.value;
     actualizar();
     return true;
   }
@@ -611,7 +800,23 @@ function manejar(el) {
   return false;
 }
 form.addEventListener("input", e => { if (e.target && manejar(e.target)) e.stopPropagation(); });
-form.addEventListener("change", e => { if (e.target && manejar(e.target)) e.stopPropagation(); });
+form.addEventListener("change", e => {
+  const el = e.target;
+  if (!el) return;
+  if (el.dataset && el.dataset.img) {          // imagen de una sección propia
+    const n = el.dataset.img, i = +el.dataset.idx;
+    comprimirImagen(el.files[0], 1400, 0.82, url => {
+      if (!url) return;
+      datos[n][i].imagen = url;
+      renderListas();
+      actualizar(true);
+      avisar("Imagen añadida a la sección ✓");
+    });
+    el.value = "";
+    return;
+  }
+  if (manejar(el)) e.stopPropagation();
+});
 
 /* ══════════ Eventos: añadir / borrar / mover ══════════ */
 form.addEventListener("click", e => {
@@ -621,6 +826,7 @@ form.addEventListener("click", e => {
     datos[n] = datos[n] || [];
     datos[n].push(LISTAS[n].vacio());
     renderListas();
+    renderOrden();
     actualizar(true);
     return;
   }
@@ -630,6 +836,54 @@ form.addEventListener("click", e => {
     if (!confirm("¿Eliminar este elemento?")) return;
     datos[n].splice(+del.dataset.idx, 1);
     renderListas();
+    renderOrden();
+    actualizar(true);
+    return;
+  }
+  const subAdd = e.target.closest("[data-subadd]");
+  if (subAdd) {
+    const n = subAdd.dataset.subadd, i = +subAdd.dataset.idx, k = subAdd.dataset.key;
+    const campo = LISTAS[n].campos.find(c => c.k === k) || {};
+    const lista = datos[n][i][k] = datos[n][i][k] || [];
+    lista.push(campo.subvacio ? campo.subvacio() : {});
+    renderListas();
+    actualizar(true);
+    return;
+  }
+  const subDel = e.target.closest("[data-subdel]");
+  if (subDel) {
+    const n = subDel.dataset.subdel, i = +subDel.dataset.idx, k = subDel.dataset.key, si = +subDel.dataset.subidx;
+    if (!confirm("¿Eliminar esta entrada?")) return;
+    datos[n][i][k].splice(si, 1);
+    renderListas();
+    actualizar(true);
+    return;
+  }
+  const subMove = e.target.closest("[data-submove]");
+  if (subMove) {
+    const n = subMove.dataset.submove, i = +subMove.dataset.idx, k = subMove.dataset.key;
+    const si = +subMove.dataset.subidx, dir = +subMove.dataset.dir, sj = si + dir;
+    const arr = datos[n][i][k];
+    if (!arr || sj < 0 || sj >= arr.length) return;
+    [arr[si], arr[sj]] = [arr[sj], arr[si]];
+    renderListas();
+    actualizar(true);
+    return;
+  }
+  const imgDel = e.target.closest("[data-imgdel]");
+  if (imgDel) {
+    datos[imgDel.dataset.imgdel][+imgDel.dataset.idx].imagen = "";
+    renderListas();
+    actualizar(true);
+    return;
+  }
+  const ord = e.target.closest("[data-orden]");
+  if (ord) {
+    normalizarOrden();
+    const i = +ord.dataset.orden, dir = +ord.dataset.dir, j = i + dir;
+    if (j < 0 || j >= datos.orden.length) return;
+    [datos.orden[i], datos.orden[j]] = [datos.orden[j], datos.orden[i]];
+    renderOrden();
     actualizar(true);
     return;
   }
@@ -667,18 +921,18 @@ document.querySelectorAll("[data-zoom]").forEach(b => {
 });
 
 /* ══════════ Eventos: foto ══════════ */
-function procesarFoto(file) {
-  if (!file) return;
-  if (!/^image\//.test(file.type)) { avisar("Ese archivo no es una imagen."); return; }
+/** Lee una imagen, la escala y la devuelve como data URL (o null si falla) */
+function comprimirImagen(file, max, calidad, cb) {
+  if (!file) return cb(null);
+  if (!/^image\//.test(file.type)) { avisar("Ese archivo no es una imagen."); return cb(null); }
   const fr = new FileReader();
-  fr.onerror = () => avisar("No se pudo leer la imagen.");
+  fr.onerror = () => { avisar("No se pudo leer la imagen."); cb(null); };
   fr.onload = ev => {
     const img = new Image();
-    img.onerror = () => avisar("No se pudo procesar esta imagen. Prueba con JPG o PNG.");
+    img.onerror = () => { avisar("No se pudo procesar esta imagen. Prueba con JPG o PNG."); cb(null); };
     img.onload = () => {
-      const max = 760;
       let w = img.naturalWidth, h = img.naturalHeight;
-      if (!w || !h) { avisar("Imagen vacía."); return; }
+      if (!w || !h) { avisar("Imagen vacía."); return cb(null); }
       const escala = Math.min(1, max / Math.max(w, h));
       w = Math.max(1, Math.round(w * escala));
       h = Math.max(1, Math.round(h * escala));
@@ -688,16 +942,23 @@ function procesarFoto(file) {
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
-      try { datos.foto = lienzo.toDataURL("image/jpeg", 0.86); }
-      catch (err) { avisar("No se pudo comprimir la imagen."); return; }
-      pintarFoto();
-      if (!mostrarFoto) { mostrarFoto = true; volcarEstilo(); }
-      actualizar(true);
-      avisar("Foto añadida ✓");
+      try { cb(lienzo.toDataURL("image/jpeg", calidad)); }
+      catch (err) { avisar("No se pudo comprimir la imagen."); cb(null); }
     };
     img.src = ev.target.result;
   };
   fr.readAsDataURL(file);
+}
+
+function procesarFoto(file) {
+  comprimirImagen(file, 760, 0.86, url => {
+    if (!url) return;
+    datos.foto = url;
+    pintarFoto();
+    if (!mostrarFoto) { mostrarFoto = true; volcarEstilo(); }
+    actualizar(true);
+    avisar("Foto añadida ✓");
+  });
 }
 document.getElementById("foto-in").addEventListener("change", e => {
   procesarFoto(e.target.files[0]);
@@ -796,11 +1057,13 @@ document.getElementById("btn-vaciar").addEventListener("click", () => {
 });
 
 function refrescarTodo() {
+  normalizarSecciones();
   renderPlantillas();
   volcarEstaticos();
   volcarTitulos();
   volcarEstilo();
   renderListas();
+  renderOrden();
   pintarFoto();
   actualizar(true);
 }
@@ -809,6 +1072,7 @@ function refrescarTodo() {
 (function iniciar() {
   cargar();
   if (!datos.titulos) datos.titulos = {};
+  normalizarSecciones();
   coloresDe(tema);
 
   // fuentes en el desplegable
