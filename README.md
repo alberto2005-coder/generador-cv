@@ -86,4 +86,99 @@ La variable `{{cuerpo}}` es **obligatoria**: ahí se pintan las secciones en el 
 
 ## Licencia
 
-MIT — úsalo, modifícalo y compártelo libremente.
+GPL-3.0 — úsalo, modifícalo y compártelo libremente; si distribuyes copias o versiones modificadas, publícalas bajo la misma licencia (copyleft). Ver [LICENSE](LICENSE).
+
+# 📄 Resume Builder — Templates, Photo & PDF Export
+
+A 100% static web app to build resumes directly in the browser: pick from **6 templates**, upload your photo, customize **colors, typography, sizing, and section ordering**, and export the final result as a **PDF**.
+
+No servers, no databases, and **zero dependencies**: everything runs client-side in your browser and persists locally via `localStorage`. Ideal for free hosting on **GitHub Pages**.
+
+## 🚀 Quickstart
+
+1. Open `index.html` in your browser (double-clicking the file works).
+2. Choose a template → enter your details → upload a photo.
+3. Click the **⬇ Download PDF** button → in the print dialog, select:
+* Destination: **Save as PDF**
+* Margins: **None**
+* ✅ **Background graphics** (to preserve custom styling and colors)
+
+
+
+> Double-clicking the local file runs fully functional; if you prefer running via a local development server:
+> `npx serve .` or `python -m http.server 8000`
+
+## ✨ Features
+
+| Feature | Details |
+| --- | --- |
+| 📐 **Templates** | Modern, Classic, Minimal, Creative, Elegant, Technical (switch at any time without losing data) |
+| 🖼 **Photo** | Direct upload with automatic cropping and compression; toggle visibility with one click |
+| 🎨 **Styling** | Primary, secondary, text, and background colors · font family · text size · line height · heading styles · toggle photo and footer |
+| ✏️ **Headings** | Rename (or hide) the headings of every section |
+| 🔀 **Ordering** | Move any section up or down, including custom sections |
+| 📌 **Custom Sections** | Unlimited custom blocks with 4 formats: **list**, **project-style entries**, **paragraph**, and **image** |
+| ➕ **Custom Fields** | Add as many extra metadata fields as needed (licenses, availability, permits…) |
+| 📦 **Data Blocks** | Experience, education, projects, skills, and languages with full add / delete / reorder support |
+| 💾 **Backups** | In-browser autosave + JSON import/export, and raw HTML export |
+
+## 📁 Repository Structure
+
+```
+generador-cv-estatico/
+├── index.html                  # Main app entrypoint (GitHub Pages entry)
+├── assets/
+│   ├── app.css                 # Editor UI styles
+│   ├── app.js                  # Core logic: data state, rendering, theming, exports
+│   └── plantillas.js           # The 6 templates (HTML structure + CV CSS)
+├── .github/workflows/pages.yml # Automated GitHub Pages deployment
+└── README.md
+
+```
+
+## 🌐 Deploy to GitHub Pages
+
+1. Push the project to a GitHub repository:
+```bash
+git init
+git add .
+git commit -m "Resume Builder"
+git branch -M main
+git remote add origin https://github.com/YOUR-USER/YOUR-REPO.git
+git push -u origin main
+
+```
+
+
+2. In GitHub: go to **Settings → Pages → Source: GitHub Actions**.
+
+The included workflow automatically deploys the root directory on every push (no build step required: the site is already static).
+
+## ➕ Adding a New Template
+
+Open `assets/plantillas.js` and add a new entry to the `PLANTILLAS` object:
+
+```js
+mytemplate: {
+  nombre: "My Template",
+  desc: "Short description displayed on the template card",
+  defecto: { acento: "#2563eb", secundario: "#0f172a", texto: "#1f2937", fondo: "#f1f5f9" },
+  html: `<!DOCTYPE html> … <div class="hoja{{estilo_clase}}"> … </div>`,
+  css: `.hoja{…} …`
+}
+
+```
+
+Available template placeholders: `{{css}}`, `{{nombre}}`, `{{puesto}}`, `{{foto}}`, `{{cuerpo}}`, `{{contacto}}`, `{{habilidades}}`, `{{idiomas}}`, `{{pie}}`.
+
+The `{{cuerpo}}` token is **mandatory**: it renders all dynamic sections in your chosen order.
+
+## 🔒 Privacy Notice
+
+* Your resume data, photo, and color settings **never leave your device**: everything lives inside browser `localStorage`.
+* To migrate your data to another computer, export the JSON file (⬇ JSON) and import it (⬆ JSON).
+* Clearing browser cache or opening the site in a different browser will display the initial default demo data.
+
+## License
+
+GPL-3.0 — free to use, modify, and share; if you distribute copies or derivative works, they must be published under the same copyleft license. See [LICENSE](https://www.google.com/search?q=LICENSE).
