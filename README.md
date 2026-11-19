@@ -29,7 +29,7 @@ Aplicación web **100 % estática** para crear currículums en el navegador: eli
 
 ### Demo
 
-**Pruébalo:** <https://alberto2005-coder.github.io/generador-cv/>
+**Pruébalo:** <https://albertoortiz.is-a.dev/generador-cv/>
 
 ### Características
 
@@ -138,7 +138,7 @@ A **100 % static** web app to build résumés in the browser: pick one of **6 te
 
 ### Demo
 
-**Try it:** <https://alberto2005-coder.github.io/generador-cv/>
+**Try it:** <https://albertoortiz.is-a.dev/generador-cv/>
 
 ### Features
 
